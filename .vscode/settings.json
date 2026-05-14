@@ -1,0 +1,20 @@
+{
+  "css.validate": false,
+  "css.lint.compatibleVendorPrefixes": "ignore",
+  "css.lint.vendorPrefix": "ignore",
+  "css.lint.duplicateProperties": "ignore",
+  "css.lint.emptyRules": "ignore",
+  "css.lint.importStatement": "ignore",
+  "css.lint.ieHack": "ignore",
+  "css.lint.important": "ignore",
+  "css.lint.universalSelector": "ignore",
+  "css.lint.unknownAtRules": "ignore",
+  "css.lint.unknownVendorSpecificProperty": "ignore",
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "problems.exclude": {
+    "**/globals.css:*": ["@tailwind"]
+  }
+}
+
