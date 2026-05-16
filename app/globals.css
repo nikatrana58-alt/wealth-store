@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
 html {
   scroll-behavior: smooth;
@@ -8,14 +9,34 @@ body {
   background: #020617;
   color: white;
   overflow-x: hidden;
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+
+h1, h2, h3, .font-premium {
+  font-family: 'Playfair Display', serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
+/* Noise Overlay */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  filter: contrast(150%) brightness(100%);
+}
+
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -36,24 +57,24 @@ body {
 
 .purple-glow {
   position: absolute;
-  width: 500px;
-  height: 500px;
+  width: 600px;
+  height: 600px;
 
-  background: rgba(168,85,247,0.25);
+  background: radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%);
 
-  filter: blur(120px);
+  filter: blur(80px);
 
   border-radius: 999px;
 }
 
 .pink-glow {
   position: absolute;
-  width: 500px;
-  height: 500px;
+  width: 600px;
+  height: 600px;
 
-  background: rgba(236,72,153,0.2);
+  background: radial-gradient(circle, rgba(236,72,153,0.1) 0%, transparent 70%);
 
-  filter: blur(120px);
+  filter: blur(80px);
 
   border-radius: 999px;
 }
@@ -61,11 +82,19 @@ body {
 /* Glass */
 
 .glass {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.03);
 
+  backdrop-filter: blur(24px) saturate(180%);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+}
+
+.glass-dark {
+  background: rgba(0,0,0,0.4);
   backdrop-filter: blur(20px);
-
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 /* Smooth */
@@ -73,7 +102,7 @@ body {
 button,
 img,
 a {
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 @keyframes marquee {
 
@@ -89,7 +118,7 @@ a {
 
 .animate-marquee {
 
-  animation: marquee 15s linear infinite;
+  animation: marquee 25s linear infinite;
 
 }
 .spotlight {
@@ -110,13 +139,13 @@ a {
 
   background: radial-gradient(
     circle at var(--x) var(--y),
-    rgba(255,255,255,0.15),
-    transparent 40%
+    rgba(255,255,255,0.1),
+    transparent 50%
   );
 
   opacity: 0;
 
-  transition: opacity 0.3s;
+  transition: opacity 0.5s;
 
 }
 
@@ -148,11 +177,11 @@ a {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.05),
     transparent
   );
 
-  animation: shimmer 2s infinite;
+  animation: shimmer 3s infinite;
 
 }
 
@@ -166,52 +195,53 @@ a {
 .depth-shadow {
 
   box-shadow:
-    0 10px 40px rgba(0,0,0,0.3),
-    0 0 80px rgba(168,85,247,0.15);
+    0 20px 50px rgba(0,0,0,0.5),
+    0 0 100px rgba(168,85,247,0.1);
 
 }
 @keyframes floatGradient {
 
   0% {
-    transform: translateY(0px);
+    transform: translateY(0px) scale(1);
   }
 
   50% {
-    transform: translateY(-30px);
+    transform: translateY(-20px) scale(1.05);
   }
 
   100% {
-    transform: translateY(0px);
+    transform: translateY(0px) scale(1);
   }
 
 }
 
 .floating-gradient {
 
-  animation: floatGradient 8s ease-in-out infinite;
+  animation: floatGradient 10s ease-in-out infinite;
 
 }
 .card-depth {
 
   transition:
-    transform 0.4s ease,
-    box-shadow 0.4s ease;
+    transform 0.6s cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 
 }
 
 .card-depth:hover {
 
   transform:
-    translateY(-12px)
-    rotateX(3deg);
+    translateY(-16px)
+    scale(1.02);
 
   box-shadow:
-    0 20px 60px rgba(168,85,247,0.2);
+    0 30px 70px rgba(0,0,0,0.5),
+    0 0 50px rgba(168,85,247,0.15);
 
 }
-.search-glow {
 
-  box-shadow:
-    0 0 40px rgba(168,85,247,0.25);
-
+.premium-gradient {
+  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
