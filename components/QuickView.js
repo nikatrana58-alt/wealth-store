@@ -57,7 +57,7 @@ export default function QuickView({
 
           <div className="grid lg:grid-cols-2">
             <div className="relative overflow-hidden">
-              <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="absolute inset-0 z-10 bg-linear-to-t from-black/40 to-transparent" />
 
               <img
                 src={product.image}
@@ -68,7 +68,7 @@ export default function QuickView({
 
             <div className="flex flex-col justify-center p-10 md:p-16">
               <div className="mb-8 flex items-center gap-4">
-                <span className="rounded-full bg-gradient-to-r from-purple-600 to-pink-500 px-5 py-2 font-bold">
+                <span className="rounded-full bg-linear-to-r from-purple-600 to-pink-500 px-5 py-2 font-bold">
                   {product.badge}
                 </span>
 
@@ -104,7 +104,7 @@ export default function QuickView({
                   href={product.affiliate}
                   target="_blank"
                   rel="noreferrer"
-                  className="rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 px-10 py-5 font-black shadow-2xl shadow-purple-500/30 transition hover:scale-105"
+                  className="rounded-2xl bg-linear-to-r from-purple-600 to-pink-500 px-10 py-5 font-black shadow-2xl shadow-purple-500/30 transition hover:scale-105"
                 >
                   Buy Now
                 </a>

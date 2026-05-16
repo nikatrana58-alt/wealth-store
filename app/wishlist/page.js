@@ -5,21 +5,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function WishlistPage() {
-
-  const [wishlist, setWishlist] =
-    useState([]);
+  const [wishlist, setWishlist] = useState([]);
 
   useEffect(() => {
-
-    const saved =
-      JSON.parse(
-        localStorage.getItem(
-          "wishlist"
-        ) || "[]"
-      );
-
-    setWishlist(saved);
-
+    if (typeof window !== "undefined") {
+      const saved = JSON.parse(localStorage.getItem("wishlist") || "[]");
+      setTimeout(() => {
+        setWishlist(saved);
+      }, 0);
+    }
   }, []);
 
   return (
@@ -51,7 +45,7 @@ export default function WishlistPage() {
               <Link
                 key={product.slug}
                 href={`/product/${product.slug}`}
-                className="glass rounded-[32px] overflow-hidden group"
+                className="glass rounded-4xl overflow-hidden group"
               >
 
                 <img

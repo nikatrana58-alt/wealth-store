@@ -15,7 +15,7 @@ import AuthModal from "./AuthModal";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 
-const SUPER_ADMIN_EMAIL = "admin@wealthstore.com";
+const SUPER_ADMIN_EMAIL = "nikatrana58@gmail.com";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);

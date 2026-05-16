@@ -17,7 +17,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-          className="glass relative overflow-hidden rounded-[40px] p-10 md:p-16"
+          className="glass relative overflow-hidden rounded-5xl p-10 md:p-16"
         >
           <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-pink-500/20 blur-3xl" />
 
@@ -34,7 +34,7 @@ export default function Hero() {
 
             <h1 className="mt-8 text-5xl font-black leading-tight md:text-8xl">
               Future Of
-              <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                 {" "}Online{" "}
               </span>
               Shopping

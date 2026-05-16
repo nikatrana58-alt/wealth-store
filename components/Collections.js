@@ -41,7 +41,7 @@ export default function Collections() {
         <h2 className="text-5xl md:text-7xl font-black mt-8">
 
           Explore By
-          <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
             {" "}Collections
           </span>
 
@@ -55,7 +55,7 @@ export default function Collections() {
 
           <div
             key={collection.title}
-            className="relative overflow-hidden rounded-[40px] h-[500px] group"
+            className="relative overflow-hidden rounded-5xl h-[500px] group"
           >
 
             <img
@@ -64,7 +64,7 @@ export default function Collections() {
               className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
 
             <div className="absolute bottom-0 left-0 p-8">
 

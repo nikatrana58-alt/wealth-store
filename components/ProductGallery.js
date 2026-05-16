@@ -16,12 +16,12 @@ export default function ProductGallery({
 
     <div>
 
-      <div className="overflow-hidden rounded-[40px] border border-white/10">
+      <div className="overflow-hidden rounded-5xl border border-white/10">
 
         <img
           src={activeImage}
           alt={product.title}
-          className="w-full h-[700px] object-cover hover:scale-105 transition duration-700"
+          className="w-full h-175 object-cover hover:scale-105 transition duration-700"
         />
 
       </div>

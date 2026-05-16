@@ -35,10 +35,10 @@ export default function Stats() {
             whileHover={{
               y: -10
             }}
-            className="glass rounded-[32px] p-8 text-center"
+            className="glass rounded-4xl p-8 text-center"
           >
 
-            <h3 className="text-5xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            <h3 className="text-5xl font-black bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
 
               {stat.number}
 

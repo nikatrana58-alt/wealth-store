@@ -75,7 +75,7 @@ export default function Footer() {
               className="w-full glass rounded-2xl px-5 py-4 outline-none"
             />
 
-            <button className="mt-5 w-full bg-gradient-to-r from-purple-600 to-pink-500 py-4 rounded-2xl font-bold">
+            <button className="mt-5 w-full bg-linear-to-r from-purple-600 to-pink-500 py-4 rounded-2xl font-bold">
 
               Subscribe
 

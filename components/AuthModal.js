@@ -109,7 +109,7 @@ export default function AuthModal({
           opacity: 1,
           scale: 1
         }}
-        className="glass rounded-[40px] p-10 max-w-lg w-full relative"
+        className="glass rounded-5xl p-10 max-w-lg w-full relative"
       >
 
         {/* Close */}
@@ -194,7 +194,7 @@ export default function AuthModal({
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-500 py-5 rounded-2xl font-black hover:scale-[1.02] active:scale-95 transition shadow-lg shadow-purple-500/20"
+            className="w-full bg-linear-to-r from-purple-600 to-pink-500 py-5 rounded-2xl font-black hover:scale-[1.02] active:scale-95 transition shadow-lg shadow-purple-500/20"
           >
 
             {isSignUp ? "Create Account" : "Sign In"}

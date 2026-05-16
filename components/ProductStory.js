@@ -20,7 +20,7 @@ export default function ProductStory() {
           <h2 className="text-5xl md:text-7xl font-black leading-tight mt-8">
 
             Products That
-            <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
               {" "}Inspire
             </span>
 

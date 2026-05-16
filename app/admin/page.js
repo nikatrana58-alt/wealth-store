@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash2, LogOut, ShieldCheck, Eye, Package, Settings, Users, BarChart3, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const SUPER_ADMIN_EMAIL = "nikatrana1900@gmail.com";
+const SUPER_ADMIN_EMAIL = "nikatrana58@gmail.com";
 
 export default function AdminPage() {
   const [user, setUser] = useState(null);
@@ -32,6 +32,12 @@ export default function AdminPage() {
     score: 90,
   });
 
+  const fetchProducts = async () => {
+    const querySnapshot = await getDocs(collection(db, "products"));
+    const p = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setProducts(p);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       if (u) {
@@ -44,12 +50,6 @@ export default function AdminPage() {
     });
     return () => unsubscribe();
   }, [router]);
-
-  const fetchProducts = async () => {
-    const querySnapshot = await getDocs(collection(db, "products"));
-    const p = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setProducts(p);
-  };
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -109,7 +109,7 @@ export default function AdminPage() {
       {/* Sidebar */}
       <aside className="w-80 border-r border-white/10 p-8 flex flex-col gap-10">
         <div>
-          <h1 className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
+          <h1 className="text-2xl font-black bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent flex items-center gap-2">
             <ShieldCheck className="text-purple-500" />
             Control Center
           </h1>
@@ -142,7 +142,7 @@ export default function AdminPage() {
         <div className="mt-auto">
           <div className="glass p-5 rounded-3xl mb-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center font-black">
+              <div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-500 to-pink-500 flex items-center justify-center font-black">
                 {user?.email[0].toUpperCase()}
               </div>
               <div>
@@ -188,10 +188,14 @@ export default function AdminPage() {
               <motion.div
                 layout
                 key={product.id}
-                className="glass p-6 rounded-[32px] flex gap-6 group hover:border-purple-500/30 transition-all"
+                className="glass p-6 rounded-4xl flex gap-6 group hover:border-purple-500/30 transition-all"
               >
                 <div className="w-32 h-32 rounded-2xl overflow-hidden shrink-0">
-                  <img src={product.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <img 
+                    src={product.image} 
+                    alt={product.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                  />
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
@@ -220,7 +224,7 @@ export default function AdminPage() {
             ))}
           </div>
         ) : (
-          <div className="glass p-20 rounded-[40px] text-center">
+          <div className="glass p-20 rounded-5xl text-center">
             <h3 className="text-2xl font-bold text-gray-500">Feature under maintenance</h3>
             <p className="text-gray-600 mt-2">This section will be available in the next premium update.</p>
           </div>
@@ -298,7 +302,7 @@ export default function AdminPage() {
                 />
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-purple-600 to-pink-500 py-5 rounded-2xl font-black col-span-2 hover:scale-[1.02] active:scale-95 transition shadow-xl shadow-purple-500/20 mt-4"
+                  className="bg-linear-to-r from-purple-600 to-pink-500 py-5 rounded-2xl font-black col-span-2 hover:scale-[1.02] active:scale-95 transition shadow-xl shadow-purple-500/20 mt-4"
                 >
                   Confirm & List Product
                 </button>

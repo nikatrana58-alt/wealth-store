@@ -19,9 +19,9 @@ export default function ProductCard({ product }) {
         style={{ transformStyle: "preserve-3d" }}
       >
         {/* Hover Glow */}
-        <div className="absolute inset-0 rounded-[40px] bg-gradient-to-r from-purple-600/20 to-pink-500/20 opacity-0 blur-3xl transition duration-700 group-hover:opacity-100" />
+        <div className="absolute inset-0 rounded-5xl bg-linear-to-r from-purple-600/20 to-pink-500/20 opacity-0 blur-3xl transition duration-700 group-hover:opacity-100" />
 
-        <div className="glass relative overflow-hidden rounded-[40px] border border-white/5 bg-black/20 backdrop-blur-3xl">
+        <div className="glass relative overflow-hidden rounded-5xl border border-white/5 bg-black/20 backdrop-blur-3xl">
           {/* Badge & Stats Overlay */}
           <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
             {product.badge && (
@@ -54,7 +54,7 @@ export default function ProductCard({ product }) {
               alt={product.title}
               className="w-full h-full object-cover transition duration-1000 ease-out group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-60" />
+            <div className="absolute inset-0 bg-linear-to-t from-[#020617] via-transparent to-transparent opacity-60" />
           </div>
 
           {/* Content Section */}
@@ -91,7 +91,7 @@ export default function ProductCard({ product }) {
                     initial={{ width: 0 }}
                     whileInView={{ width: `${product.score}%` }}
                     transition={{ duration: 1.5, delay: 0.2 }}
-                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500" 
+                    className="h-full bg-linear-to-r from-purple-500 to-pink-500" 
                   />
                 </div>
                 <span className="text-[10px] font-black text-white">{product.score}%</span>

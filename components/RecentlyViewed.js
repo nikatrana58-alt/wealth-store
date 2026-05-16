@@ -27,7 +27,7 @@ export default function RecentlyViewed() {
           <h2 className="text-5xl font-black mt-6">
 
             Recently
-            <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
               {" "}Viewed
             </span>
 
@@ -43,7 +43,7 @@ export default function RecentlyViewed() {
 
           <div
             key={product.slug}
-            className="glass rounded-[32px] overflow-hidden"
+            className="glass rounded-4xl overflow-hidden"
           >
 
             <img

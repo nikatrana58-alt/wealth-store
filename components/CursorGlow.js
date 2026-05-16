@@ -27,7 +27,7 @@ export default function CursorGlow() {
   return (
     <>
       <motion.div
-        className="fixed pointer-events-none z-[9999] w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[100px]"
+        className="fixed pointer-events-none z-[9999] w-[600px] h-150 rounded-full bg-purple-600/10 blur-[100px]"
         style={{
           x: springX,
           y: springY,

@@ -1,26 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import Link from "next/link";
 import { getProducts } from "@/lib/getProducts";
-import { ArrowLeft, ShoppingCart, Star, Eye, ShieldCheck, Truck, RotateCcw } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Star, Eye, ShieldCheck, Truck, RotateCcw, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export default function ProductPage({ params }) {
+  const { slug } = use(params);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
       const allProducts = await getProducts();
-      const p = allProducts.find((item) => item.slug === params.slug);
+      const p = allProducts.find((item) => item.slug === slug);
       setProduct(p);
       setLoading(false);
     };
     fetchProduct();
-  }, [params.slug]);
+  }, [slug]);
 
   if (loading) return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center">
@@ -58,18 +59,22 @@ export default function ProductPage({ params }) {
             animate={{ opacity: 1, x: 0 }}
             className="space-y-6"
           >
-            <div className="glass rounded-[48px] overflow-hidden border border-white/5 bg-white/5 p-4">
+            <div className="glass rounded-4xl overflow-hidden border border-white/5 bg-white/5 p-4">
               <img
                 src={product.image}
                 alt={product.title}
-                className="rounded-[32px] w-full h-[600px] object-cover"
+                className="rounded-4xl w-full h-150 object-cover"
               />
             </div>
             
             <div className="grid grid-cols-3 gap-4">
               {(product.gallery || [product.image, product.image, product.image]).slice(0, 3).map((img, i) => (
                 <div key={i} className="glass rounded-3xl overflow-hidden aspect-square p-2 bg-white/5 hover:border-purple-500/50 transition cursor-pointer">
-                  <img src={img} className="w-full h-full object-cover rounded-2xl" />
+                  <img 
+                    src={img} 
+                    alt={`${product.title} gallery image ${i + 1}`}
+                    className="w-full h-full object-cover rounded-2xl" 
+                  />
                 </div>
               ))}
             </div>
@@ -96,7 +101,7 @@ export default function ProductPage({ params }) {
             </h1>
 
             <div className="flex items-center gap-6 mb-12">
-              <div className="text-5xl font-black bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+              <div className="text-5xl font-black bg-linear-to-r from-white to-gray-500 bg-clip-text text-transparent">
                 {product.price}
               </div>
               <div className="glass px-5 py-2.5 rounded-2xl flex items-center gap-2 border border-white/10">
@@ -117,7 +122,7 @@ export default function ProductPage({ params }) {
                 { icon: RotateCcw, label: "Luxury Support", sub: "24/7 Assistance" },
                 { icon: Sparkles, label: "Exclusive Item", sub: "Limited Availability" },
               ].map((item, i) => (
-                <div key={i} className="glass p-5 rounded-3xl flex items-center gap-4 border border-white/5 bg-white/[0.02]">
+                <div key={i} className="glass p-5 rounded-3xl flex items-center gap-4 border border-white/5 bg-white/2">
                   <div className="w-12 h-12 rounded-2xl bg-white text-black flex items-center justify-center shrink-0">
                     <item.icon size={20} />
                   </div>
@@ -133,7 +138,7 @@ export default function ProductPage({ params }) {
               <a
                 href={product.affiliate}
                 target="_blank"
-                className="w-full bg-white text-black py-6 rounded-[24px] font-black text-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-white/5"
+                className="w-full bg-white text-black py-6 rounded-3xl font-black text-xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-white/5"
               >
                 <ShoppingCart size={22} />
                 Acquire Now

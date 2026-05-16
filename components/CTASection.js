@@ -24,7 +24,7 @@ export default function CTASection() {
           <h2 className="text-5xl md:text-7xl font-black leading-tight mt-8">
 
             Upgrade Your
-            <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
               {" "}Lifestyle
             </span>
 
@@ -36,7 +36,7 @@ export default function CTASection() {
 
           </p>
 
-          <button className="mt-10 bg-gradient-to-r from-purple-600 to-pink-500 px-10 py-5 rounded-2xl font-black text-lg hover:scale-105 transition">
+          <button className="mt-10 bg-linear-to-r from-purple-600 to-pink-500 px-10 py-5 rounded-2xl font-black text-lg hover:scale-105 transition">
 
             Explore Products
 

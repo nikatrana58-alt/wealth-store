@@ -21,7 +21,6 @@ import Reveal from "@/components/Reveal";
 import AIRecommendations from "@/components/AIRecommendations";
 import FloatingSidebar from "@/components/FloatingSidebar";
 import TrendingSlider from "@/components/TrendingSlider";
-import QuickView from "@/components/QuickView";
 import MobileDock from "@/components/MobileDock";
 import GridBackground from "@/components/GridBackground";
 import Marquee from "@/components/Marquee";
@@ -158,7 +157,7 @@ export default function Home() {
             >
               <h2 className="text-5xl md:text-7xl font-black leading-tight">
                 Curated
-                <span className="bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent italic">
+                <span className="bg-linear-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent italic">
                   {" "}Excellence
                 </span>
               </h2>
@@ -194,7 +193,7 @@ export default function Home() {
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="glass h-[400px] rounded-[40px] skeleton" />
+                  <div key={i} className="glass h-[400px] rounded-5xl skeleton" />
                 ))}
               </motion.div>
             ) : filteredProducts.length === 0 ? (
