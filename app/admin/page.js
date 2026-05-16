@@ -116,6 +116,7 @@ export default function AdminPage() {
           <p className="text-gray-500 text-sm mt-2">Premium Merchant Dashboard</p>
         </div>
 
+
         <nav className="flex flex-col gap-2 flex-1">
           {[
             { id: "inventory", label: "Inventory", icon: Package },
@@ -246,7 +247,7 @@ export default function AdminPage() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative glass max-w-2xl w-full p-10 rounded-[48px] border border-white/20"
+              className="relative glass max-w-2xl w-full p-10 rounded-5xl border border-white/20"
             >
               <h2 className="text-3xl font-black mb-8">Add Luxury Product</h2>
               <form onSubmit={handleAddProduct} className="grid grid-cols-2 gap-5">

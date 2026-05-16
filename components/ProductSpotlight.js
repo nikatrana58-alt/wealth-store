@@ -75,11 +75,11 @@ export default function ProductSpotlight() {
         >
           <div className="absolute inset-0 bg-purple-600/20 blur-[120px] rounded-full group-hover:bg-purple-600/30 transition-all duration-1000"></div>
           
-          <div className="relative glass p-4 rounded-[60px] border border-white/10 overflow-hidden bg-white/5 backdrop-blur-3xl">
+          <div className="relative glass p-4 rounded-6xl border border-white/10 overflow-hidden bg-white/5 backdrop-blur-3xl">
             <img
               src={product.image}
               alt={product.title}
-              className="relative z-10 rounded-[48px] w-full h-175 object-cover hover:scale-[1.02] transition-transform duration-1000"
+              className="relative z-10 rounded-5xl w-full h-175 object-cover hover:scale-[1.02] transition-transform duration-1000"
             />
             
             <div className="absolute bottom-12 right-12 z-20">

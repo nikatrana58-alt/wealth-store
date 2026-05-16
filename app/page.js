@@ -201,7 +201,7 @@ export default function Home() {
                 key="empty"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-40 glass rounded-[60px]"
+                className="text-center py-40 glass rounded-6xl"
               >
                 <h3 className="text-3xl font-black text-gray-500">No Treasures Found</h3>
                 <p className="text-gray-600 mt-2">Try adjusting your filters for more luxury.</p>

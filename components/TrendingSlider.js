@@ -42,7 +42,7 @@ export default function TrendingSlider() {
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="min-w-[400px] glass rounded-[48px] overflow-hidden group border border-white/5 hover:border-purple-500/30 transition-all duration-700"
+              className="min-w-[400px] glass rounded-5xl overflow-hidden group border border-white/5 hover:border-purple-500/30 transition-all duration-700"
             >
               <div className="h-64 overflow-hidden relative">
                 <img

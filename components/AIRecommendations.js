@@ -46,13 +46,13 @@ export default function AIRecommendations() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1, duration: 0.8 }}
-              className="glass rounded-[48px] overflow-hidden group border border-white/5 hover:border-purple-500/30 transition-all duration-700 bg-white/2"
+              className="glass rounded-5xl overflow-hidden group border border-white/5 hover:border-purple-500/30 transition-all duration-700 bg-white/2"
             >
               <div className="relative aspect-square overflow-hidden p-4">
                 <img
                   src={product.image}
                   alt={product.title}
-                  className="w-full h-full object-cover rounded-[36px] group-hover:scale-105 transition-transform duration-1000"
+                  className="w-full h-full object-cover rounded-4xl group-hover:scale-105 transition-transform duration-1000"
                 />
                 <div className="absolute top-8 right-8">
                   <div className="glass px-4 py-2 rounded-2xl backdrop-blur-xl border border-white/20">

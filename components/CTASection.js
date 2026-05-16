@@ -4,8 +4,8 @@ export default function CTASection() {
 
   return (
     <section className="max-w-7xl mx-auto px-5 py-32">
+      <div className="relative overflow-hidden rounded-5xl glass p-12 md:p-20">
 
-      <div className="relative overflow-hidden rounded-[48px] glass p-12 md:p-20">
 
         {/* Glow */}
 

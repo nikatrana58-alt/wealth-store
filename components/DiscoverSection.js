@@ -38,7 +38,7 @@ export default function DiscoverSection() {
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.2, duration: 1 }}
-              className="glass rounded-[60px] overflow-hidden group border border-white/5 hover:border-purple-500/30 transition-all duration-1000 bg-white/[0.01]"
+              className="glass rounded-6xl overflow-hidden group border border-white/5 hover:border-purple-500/30 transition-all duration-1000 bg-white/1"
             >
               <div className="overflow-hidden relative">
                 <img

@@ -17,7 +17,7 @@ import {
   X,
   Mail,
   Lock,
-  Chrome
+  Globe
 } from "lucide-react";
 
 export default function AuthModal({
@@ -228,11 +228,12 @@ export default function AuthModal({
           className="w-full glass py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-white/5 transition"
         >
 
-          <Chrome size={20} />
+          <Globe size={20} />
 
           Google Account
 
         </button>
+
 
         <p className="text-center mt-8 text-gray-400">
 
