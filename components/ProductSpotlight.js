@@ -1,23 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProducts } from "@/lib/getProducts";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { useProducts } from "./ProductsProvider";
 
 export default function ProductSpotlight() {
-  const [product, setProduct] = useState(null);
+  const { products, loading } = useProducts();
+  const product = products.find((item) => item.badge === "Luxury") || products[0];
 
-  useEffect(() => {
-    const load = async () => {
-      const p = await getProducts();
-      setProduct(p.find(item => item.badge === "Luxury") || p[0]);
-    };
-    load();
-  }, []);
-
-  if (!product) return null;
+  if (loading || !product) {
+    return (
+      <section className="max-w-7xl mx-auto px-5 py-32">
+        <div className="glass rounded-6xl overflow-hidden h-[760px] skeleton" />
+      </section>
+    );
+  }
 
   return (
     <section className="max-w-7xl mx-auto px-5 py-32 overflow-hidden">

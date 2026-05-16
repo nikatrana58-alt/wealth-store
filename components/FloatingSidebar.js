@@ -1,16 +1,17 @@
 "use client";
 
-const categories = [
-  "All",
-  "Tech",
-  "Gaming",
-  "Setup",
-  "Luxury"
-];
-
 export default function FloatingSidebar({
   activeCategory,
-  setActiveCategory
+  categories = [
+    "All",
+    "Luxury",
+    "Smart Home",
+    "Office",
+    "Fitness",
+    "Gadgets",
+    "Gaming",
+  ],
+  setActiveCategory,
 }) {
 
   return (

@@ -1,23 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getProducts } from "@/lib/getProducts";
 import { Search, X, Command as CommandIcon, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import { useProducts } from "./ProductsProvider";
 
 export default function CommandPalette() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [products, setProducts] = useState([]);
+  const { products } = useProducts();
 
   useEffect(() => {
-    const load = async () => {
-      const p = await getProducts();
-      setProducts(p);
-    };
-    load();
-
     const down = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();

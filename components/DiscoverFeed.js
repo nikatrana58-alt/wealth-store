@@ -1,22 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProducts } from "@/lib/getProducts";
-import { motion } from "framer-motion";
 import ProductCard from "./ProductCard";
 import MasonryGrid from "./MasonryGrid";
 import { Sparkles } from "lucide-react";
+import { useProducts } from "./ProductsProvider";
 
 export default function DiscoverFeed() {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const p = await getProducts();
-      setProducts(p);
-    };
-    load();
-  }, []);
+  const { products, loading } = useProducts();
 
   return (
     <section className="max-w-7xl mx-auto px-5 py-32">
@@ -35,14 +25,22 @@ export default function DiscoverFeed() {
         </p>
       </div>
 
-      <MasonryGrid>
-        {products.map((product) => (
-          <ProductCard
-            key={product.id || product.slug}
-            product={product}
-          />
-        ))}
-      </MasonryGrid>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[1, 2, 3, 4, 5, 6].map((item) => (
+            <div key={item} className="glass h-[420px] rounded-5xl skeleton" />
+          ))}
+        </div>
+      ) : (
+        <MasonryGrid>
+          {products.map((product) => (
+            <ProductCard
+              key={product.id || product.slug}
+              product={product}
+            />
+          ))}
+        </MasonryGrid>
+      )}
     </section>
   );
 }

@@ -1,21 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProducts } from "@/lib/getProducts";
 import { motion } from "framer-motion";
 import { BrainCircuit, Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useProducts } from "./ProductsProvider";
 
 export default function AIRecommendations() {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const p = await getProducts();
-      setProducts(p.slice(0, 3));
-    };
-    load();
-  }, []);
+  const { products, loading } = useProducts();
+  const recommendations = products.slice(0, 3);
 
   return (
     <section className="max-w-7xl mx-auto px-5 py-32">
@@ -40,7 +32,14 @@ export default function AIRecommendations() {
       </div>
 
       <div className="grid md:grid-cols-3 gap-10">
-        {products.map((product, i) => (
+        {loading
+          ? [1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="glass rounded-5xl overflow-hidden h-[560px] skeleton"
+            />
+          ))
+          : recommendations.map((product, i) => (
           <Link href={`/product/${product.slug}`} key={product.id || product.slug}>
             <motion.div
               initial={{ opacity: 0, y: 30 }}

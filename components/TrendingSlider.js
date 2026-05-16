@@ -1,21 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProducts } from "@/lib/getProducts";
 import { motion } from "framer-motion";
 import { TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useProducts } from "./ProductsProvider";
 
 export default function TrendingSlider() {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const p = await getProducts();
-      setProducts(p.slice(0, 6));
-    };
-    load();
-  }, []);
+  const { products, loading } = useProducts();
+  const featuredProducts = products.slice(0, 6);
 
   return (
     <section className="py-32 overflow-hidden">
@@ -36,7 +28,14 @@ export default function TrendingSlider() {
       </div>
 
       <div className="flex gap-8 overflow-x-auto scrollbar-hide px-5 pb-10">
-        {products.map((product, i) => (
+        {loading
+          ? [1, 2, 3].map((item) => (
+            <div
+              key={item}
+              className="min-w-[400px] glass rounded-5xl overflow-hidden h-[520px] skeleton"
+            />
+          ))
+          : featuredProducts.map((product, i) => (
           <Link href={`/product/${product.slug}`} key={product.id || product.slug}>
             <motion.div
               initial={{ opacity: 0, x: 50 }}

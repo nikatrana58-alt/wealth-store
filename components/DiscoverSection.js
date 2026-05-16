@@ -1,21 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProducts } from "@/lib/getProducts";
 import { motion } from "framer-motion";
 import { Compass, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useProducts } from "./ProductsProvider";
 
 export default function DiscoverSection() {
-  const [products, setProducts] = useState([]);
-
-  useEffect(() => {
-    const load = async () => {
-      const p = await getProducts();
-      setProducts(p.slice(0, 2));
-    };
-    load();
-  }, []);
+  const { products, loading } = useProducts();
+  const featuredProducts = products.slice(0, 2);
 
   return (
     <section className="max-w-7xl mx-auto px-5 py-32">
@@ -32,7 +24,14 @@ export default function DiscoverSection() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-10">
-        {products.map((product, i) => (
+        {loading
+          ? [1, 2].map((item) => (
+            <div
+              key={item}
+              className="glass rounded-6xl overflow-hidden h-[760px] skeleton"
+            />
+          ))
+          : featuredProducts.map((product, i) => (
           <Link href={`/product/${product.slug}`} key={product.id || product.slug}>
             <motion.div
               initial={{ opacity: 0, y: 40 }}
