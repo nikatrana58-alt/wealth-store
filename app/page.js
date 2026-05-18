@@ -8,7 +8,6 @@ import {
   Clock3,
   Filter,
   Search,
-  ShieldCheck,
   SlidersHorizontal,
   Sparkles,
   Trophy,
@@ -30,11 +29,6 @@ const SORT_OPTIONS = [
 ];
 
 const SIGNALS = [
-  {
-    icon: ShieldCheck,
-    label: "Cloud image pipeline",
-    value: "Cloudinary",
-  },
   {
     icon: Trophy,
     label: "Curation standard",
