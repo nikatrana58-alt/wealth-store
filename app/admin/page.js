@@ -38,7 +38,7 @@ import {
 } from "@/lib/products";
 import {
   uploadProductImages,
-  validateImageFile,
+  validateImageFiles,
 } from "@/lib/storage";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -60,6 +60,47 @@ const CATEGORY_SUGGESTIONS = [
   "Gadgets",
   "Gaming",
 ];
+
+const REQUIRED_PRODUCT_FIELDS = [
+  ["title", "Title"],
+  ["slug", "Slug"],
+  ["category", "Category"],
+  ["badge", "Badge"],
+  ["price", "Price"],
+  ["affiliate", "Affiliate Link"],
+  ["description", "Description"],
+];
+
+function validateProductForm(formData, selectedImages) {
+  const missingFields = REQUIRED_PRODUCT_FIELDS
+    .filter(([field]) => !formData[field]?.trim())
+    .map(([, label]) => label);
+
+  if (missingFields.length > 0) {
+    throw new Error(`Please complete these required fields: ${missingFields.join(", ")}.`);
+  }
+
+  const slug = slugify(formData.slug || formData.title);
+
+  if (!slug) {
+    throw new Error("Please enter a valid slug using letters, numbers, or hyphens.");
+  }
+
+  try {
+    const url = new URL(formData.affiliate.trim());
+
+    if (!["http:", "https:"].includes(url.protocol)) {
+      throw new Error("Affiliate Link must start with http:// or https://.");
+    }
+  } catch {
+    throw new Error("Please enter a valid Affiliate Link URL.");
+  }
+
+  return {
+    slug,
+    imageFiles: validateImageFiles(selectedImages),
+  };
+}
 
 function AdminLoadingState({ label = "Opening admin console" }) {
   return (
@@ -157,7 +198,11 @@ export default function AdminPage() {
     }));
   };
 
-  const closeAddModal = () => {
+  const closeAddModal = ({ force = false } = {}) => {
+    if (isSubmitting && !force) {
+      return;
+    }
+
     imagePreviewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
     setIsAdding(false);
     setSelectedImages([]);
@@ -177,10 +222,10 @@ export default function AdminPage() {
     }
 
     try {
-      files.forEach((file) => validateImageFile(file));
+      const imageFiles = validateImageFiles(files);
       imagePreviewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
-      setSelectedImages(files);
-      setImagePreviewUrls(files.map((file) => URL.createObjectURL(file)));
+      setSelectedImages(imageFiles);
+      setImagePreviewUrls(imageFiles.map((file) => URL.createObjectURL(file)));
       setError("");
       setSuccess("");
       setUploadProgress(0);
@@ -201,33 +246,46 @@ export default function AdminPage() {
       return;
     }
 
+    let validated;
+
+    try {
+      validated = validateProductForm(formData, selectedImages);
+    } catch (nextError) {
+      console.error("[product-upload] validation failure", nextError);
+      setError(nextError?.message || "Please complete the product form.");
+      setSuccess("");
+      return;
+    }
+
     setError("");
     setSuccess("");
     setIsSubmitting(true);
-    setIsUploadingImage(true);
+    setIsUploadingImage(false);
     setUploadProgress(0);
 
     try {
-      if (selectedImages.length === 0) {
-        throw new Error("Please choose at least one image before listing the product.");
-      }
-
-      selectedImages.forEach((file) => validateImageFile(file));
-
-      const slug = slugify(formData.slug || formData.title);
+      const { imageFiles, slug } = validated;
+      console.log("[product-upload] checking product slug", { slug });
       const existing = await getProductBySlugOnce(slug);
 
       if (existing) {
         throw new Error("That slug already exists. Choose a unique slug.");
       }
 
+      setIsUploadingImage(true);
       const uploadedImages = await uploadProductImages(
-        selectedImages,
+        imageFiles,
         ({ progress }) => {
           setUploadProgress(progress);
         },
       );
+      setIsUploadingImage(false);
+
       const uploadedImageUrls = uploadedImages.map((image) => image.url);
+
+      if (uploadedImageUrls.some((url) => !url)) {
+        throw new Error("One or more uploaded images did not return a Cloudinary URL.");
+      }
 
       const payload = buildProductPayload(formData, {
         image: uploadedImageUrls[0],
@@ -240,16 +298,35 @@ export default function AdminPage() {
         payload.gallery = [uploadedImageUrls[0]];
       }
 
-      await addDoc(collection(db, "products"), payload);
+      console.log("[product-upload] saving product to Firestore", {
+        slug: payload.slug,
+        imageCount: uploadedImageUrls.length,
+      });
+
+      let productRef;
+
+      try {
+        productRef = await addDoc(collection(db, "products"), payload);
+      } catch (firestoreError) {
+        console.error("[product-upload] firestore failure", firestoreError);
+        throw firestoreError;
+      }
+
+      console.log("[product-upload] firestore save success", {
+        productId: productRef.id,
+        slug: payload.slug,
+        image: payload.image,
+      });
 
       setFormData(EMPTY_FORM);
       setSelectedImages([]);
       setImagePreviewUrls([]);
       setUploadProgress(0);
-      closeAddModal();
+      closeAddModal({ force: true });
       setSuccess("Product listed successfully.");
     } catch (nextError) {
-      console.error("Error adding product:", nextError);
+      setIsUploadingImage(false);
+      console.error("[product-upload] submit failure", nextError);
       setError(nextError?.message || "Unable to list the product.");
     } finally {
       setIsSubmitting(false);
@@ -506,13 +583,18 @@ export default function AdminPage() {
                 </div>
                 <button
                   onClick={closeAddModal}
-                  className="text-gray-500 hover:text-white transition"
+                  disabled={isSubmitting}
+                  className="text-gray-500 hover:text-white transition disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <X size={22} />
                 </button>
               </div>
 
-              <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <form
+                onSubmit={handleAddProduct}
+                noValidate
+                className="grid grid-cols-1 md:grid-cols-2 gap-5"
+              >
                 <div className="md:col-span-2">
                   <label className="block text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-2">
                     Title
@@ -608,7 +690,11 @@ export default function AdminPage() {
                   <label className="block text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-2">
                     Product Images
                   </label>
-                  <label className="glass rounded-3xl border border-dashed border-white/15 p-5 flex flex-col gap-4 cursor-pointer hover:border-purple-500/40 transition">
+                  <label className={`glass rounded-3xl border border-dashed border-white/15 p-5 flex flex-col gap-4 transition ${
+                    isSubmitting
+                      ? "cursor-not-allowed opacity-70"
+                      : "cursor-pointer hover:border-purple-500/40"
+                  }`}>
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
                         <ImageIcon size={18} className="text-purple-400" />
@@ -625,6 +711,7 @@ export default function AdminPage() {
                       accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
                       multiple
                       className="hidden"
+                      disabled={isSubmitting}
                       onChange={handleImageSelection}
                     />
 
@@ -693,6 +780,7 @@ export default function AdminPage() {
                   <button
                     type="button"
                     onClick={closeAddModal}
+                    disabled={isSubmitting}
                     className="glass px-6 py-4 rounded-2xl font-black text-sm text-gray-300 hover:bg-white/5 transition"
                   >
                     Cancel
