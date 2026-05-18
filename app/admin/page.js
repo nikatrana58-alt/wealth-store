@@ -162,8 +162,10 @@ export default function AdminPage() {
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search || "");
         if (params.get("testAuth") === "1") {
-          setAuthReady(true);
-          setUser({ email: "nikatrana58@gmail.com" });
+          setTimeout(() => {
+            setAuthReady(true);
+            setUser({ email: "nikatrana58@gmail.com" });
+          }, 0);
           return undefined;
         }
       }
