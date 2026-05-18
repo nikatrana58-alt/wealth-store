@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { NextResponse } from "next/server";
 
 const SUPPORTED_IMAGE_TYPES = new Set([
   "image/jpeg",
@@ -61,7 +62,7 @@ export async function POST(request) {
       console.error("[cloudinary-upload] missing environment variables", {
         missingKeys,
       });
-      return Response.json(
+      return NextResponse.json(
         {
           error: `Cloudinary is not configured. Missing: ${missingKeys.join(", ")}.`,
         },
@@ -80,14 +81,14 @@ export async function POST(request) {
     const files = formData.getAll("images");
 
     if (!files.length) {
-      return Response.json(
+      return NextResponse.json(
         { error: "Please choose at least one product image." },
         { status: 400 },
       );
     }
 
     if (files.length > MAX_PRODUCT_IMAGES) {
-      return Response.json(
+      return NextResponse.json(
         { error: `Please upload ${MAX_PRODUCT_IMAGES} images or fewer per product.` },
         { status: 400 },
       );
@@ -161,10 +162,10 @@ export async function POST(request) {
     console.log("[cloudinary-upload] upload success", {
       uploadCount: uploads.length,
     });
-    return Response.json({ uploads });
+    return NextResponse.json({ uploads });
   } catch (error) {
     console.error("[cloudinary-upload] upload failure", error);
-    return Response.json(
+    return NextResponse.json(
       { error: error?.message || "Unable to upload images to Cloudinary." },
       { status: 400 },
     );
