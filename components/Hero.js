@@ -12,7 +12,7 @@ export default function Hero() {
       <div className="purple-glow floating-gradient top-0 left-0" />
       <div className="pink-glow floating-gradient bottom-0 right-0" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-5">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}

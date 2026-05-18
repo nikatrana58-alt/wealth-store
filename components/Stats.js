@@ -24,7 +24,7 @@ const stats = [
 export default function Stats() {
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-20">
+    <section className="max-w-[1440px] mx-auto px-5 py-20">
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
 

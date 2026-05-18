@@ -11,14 +11,14 @@ export default function ProductSpotlight() {
 
   if (loading || !product) {
     return (
-      <section className="max-w-7xl mx-auto px-5 py-32">
+      <section className="max-w-[1440px] mx-auto px-5 py-32">
         <div className="glass rounded-6xl overflow-hidden h-[760px] skeleton" />
       </section>
     );
   }
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-32 overflow-hidden">
+    <section className="max-w-[1440px] mx-auto px-5 py-32 overflow-hidden">
       <div className="grid lg:grid-cols-2 gap-20 items-center">
         {/* Left */}
         <motion.div
@@ -26,7 +26,7 @@ export default function ProductSpotlight() {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
         >
-          <div className="flex items-center gap-2 text-purple-400 font-black uppercase tracking-[0.3em] text-[10px] mb-8">
+          <div className="flex items-center gap-2 text-purple-400 font-black uppercase tracking-[0.3em] text-xs mb-8">
             <Sparkles size={14} />
             Spotlight Selection
           </div>
@@ -82,7 +82,7 @@ export default function ProductSpotlight() {
             
             <div className="absolute bottom-12 right-12 z-20">
               <div className="glass px-8 py-5 rounded-3xl border border-white/20 backdrop-blur-2xl">
-                <p className="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-1">Affiliate Rating</p>
+                <p className="text-xs font-black text-purple-400 uppercase tracking-widest mb-1">Affiliate Rating</p>
                 <div className="flex items-center gap-3">
                   <div className="text-3xl font-black">4.9</div>
                   <div className="flex text-yellow-500">

@@ -84,7 +84,7 @@ export default function ProductPage() {
     <div className="bg-[#020617] text-white selection:bg-purple-500">
       <Navbar />
 
-      <main className="min-h-screen px-6 py-24 max-w-7xl mx-auto">
+      <main className="min-h-screen px-6 py-24 max-w-[1440px] mx-auto">
         <Link
           href="/"
           className="group flex items-center gap-2 text-gray-500 hover:text-white mb-12 transition-colors font-bold"
@@ -172,7 +172,7 @@ export default function ProductPage() {
                   </div>
                   <div>
                     <h4 className="font-black text-sm">{item.label}</h4>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{item.sub}</p>
+                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{item.sub}</p>
                   </div>
                 </div>
               ))}

@@ -12,7 +12,7 @@ const filters = [
 export default function SmartFilters() {
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-10 overflow-x-auto">
+    <section className="max-w-[1440px] mx-auto px-5 py-10 overflow-x-auto">
 
       <div className="flex gap-4 min-w-max">
 

@@ -10,10 +10,10 @@ export default function AIRecommendations() {
   const recommendations = products.slice(0, 3);
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-32">
+    <section className="max-w-[1440px] mx-auto px-5 py-32">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
         <div>
-          <div className="flex items-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-[10px] mb-4">
+          <div className="flex items-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-xs mb-4">
             <BrainCircuit size={14} />
             Neural Engine Match
           </div>
@@ -61,7 +61,7 @@ export default function AIRecommendations() {
               </div>
 
               <div className="p-10 pt-4">
-                <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest mb-2">{product.aiTag}</p>
+                <p className="text-xs font-black text-purple-500 uppercase tracking-widest mb-2">{product.aiTag}</p>
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-2xl font-black tracking-tight group-hover:text-purple-400 transition-colors">
                     {product.title}

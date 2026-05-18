@@ -1,9 +1,8 @@
 "use client";
 
 export default function CTASection() {
-
   return (
-    <section className="max-w-7xl mx-auto px-5 py-32">
+    <section className="max-w-[1440px] mx-auto px-5 py-32">
       <div className="relative overflow-hidden rounded-5xl glass p-12 md:p-20">
 
 

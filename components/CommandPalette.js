@@ -59,7 +59,7 @@ export default function CommandPalette() {
                 className="bg-transparent outline-none w-full text-xl font-medium text-white placeholder:text-gray-600"
               />
               <div className="flex items-center gap-2">
-                <div className="glass px-2 py-1 rounded-lg text-[10px] font-black text-gray-500 border border-white/10">ESC</div>
+                <div className="glass px-2 py-1 rounded-lg text-xs font-black text-gray-500 border border-white/10">ESC</div>
               </div>
             </div>
 
@@ -98,7 +98,7 @@ export default function CommandPalette() {
             </div>
 
             <div className="bg-black/40 px-8 py-4 flex items-center justify-between border-t border-white/5">
-              <div className="flex items-center gap-6 text-[10px] font-black text-gray-600 uppercase tracking-widest">
+              <div className="flex items-center gap-6 text-xs font-black text-gray-600 uppercase tracking-widest">
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 rounded-sm bg-white/5 flex items-center justify-center border border-white/10">↑</div>
                   <div className="w-4 h-4 rounded-sm bg-white/5 flex items-center justify-center border border-white/10">↓</div>
@@ -109,7 +109,7 @@ export default function CommandPalette() {
                   Select
                 </div>
               </div>
-              <p className="text-[10px] font-black text-purple-500 uppercase tracking-widest">Wealth Store Search</p>
+              <p className="text-xs font-black text-purple-500 uppercase tracking-widest">Wealth Store Search</p>
             </div>
           </motion.div>
         </div>

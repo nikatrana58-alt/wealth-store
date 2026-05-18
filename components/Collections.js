@@ -26,9 +26,8 @@ const collections = [
 ];
 
 export default function Collections() {
-
   return (
-    <section className="max-w-7xl mx-auto px-5 py-32">
+    <section className="max-w-[1440px] mx-auto px-5 py-32">
 
       <div className="mb-16">
 

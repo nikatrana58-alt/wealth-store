@@ -9,9 +9,9 @@ export default function DiscoverFeed() {
   const { products, loading } = useProducts();
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-32">
+    <section className="max-w-[1440px] mx-auto px-5 py-32">
       <div className="mb-20 text-center">
-        <div className="flex items-center justify-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-[10px] mb-4">
+        <div className="flex items-center justify-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-xs mb-4">
           <Sparkles size={14} />
           The Infinite Vault
         </div>

@@ -10,10 +10,10 @@ export default function DiscoverSection() {
   const featuredProducts = products.slice(0, 2);
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-32">
+    <section className="max-w-[1440px] mx-auto px-5 py-32">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
         <div>
-          <div className="flex items-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-[10px] mb-4">
+          <div className="flex items-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-xs mb-4">
             <Compass size={14} />
             Exploration Hub
           </div>
@@ -49,7 +49,7 @@ export default function DiscoverSection() {
                 
                 <div className="absolute bottom-12 left-12 right-12">
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-white/10">
+                    <span className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-widest border border-white/10">
                       {product.category}
                     </span>
                     <span className="text-white/40 font-bold text-xs uppercase tracking-widest">Premium Collection</span>

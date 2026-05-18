@@ -27,14 +27,14 @@ export default function ProductCard({ product }) {
             {product.badge && (
               <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/10 backdrop-blur-md px-4 py-1.5 self-start">
                 <Star size={12} className="text-yellow-400 fill-yellow-400" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-white">
+                <span className="text-xs font-black uppercase tracking-widest text-white">
                   {product.badge}
                 </span>
               </div>
             )}
             <div className="flex items-center gap-2 rounded-full border border-white/5 bg-black/40 backdrop-blur-md px-4 py-1.5 self-start">
               <Zap size={12} className="text-purple-400" />
-              <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">
+              <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">
                 {product.aiTag || "Premium Pick"}
               </span>
             </div>
@@ -61,7 +61,7 @@ export default function ProductCard({ product }) {
           <div className="p-8">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <p className="text-[10px] font-black text-purple-500 uppercase tracking-[0.2em] mb-1">
+                <p className="text-xs font-black text-purple-500 uppercase tracking-[0.2em] mb-1">
                   {product.category}
                 </p>
                 <h3 className="text-2xl font-black tracking-tight leading-tight group-hover:text-purple-400 transition-colors">
@@ -94,7 +94,7 @@ export default function ProductCard({ product }) {
                     className="h-full bg-linear-to-r from-purple-500 to-pink-500" 
                   />
                 </div>
-                <span className="text-[10px] font-black text-white">{product.score}%</span>
+                <span className="text-xs font-black text-white">{product.score}%</span>
               </div>
             </div>
           </div>

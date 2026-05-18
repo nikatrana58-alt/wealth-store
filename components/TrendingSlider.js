@@ -11,9 +11,9 @@ export default function TrendingSlider() {
 
   return (
     <section className="py-32 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-5 mb-12 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-5 mb-12 flex items-center justify-between">
         <div>
-          <div className="flex items-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-[10px] mb-2">
+          <div className="flex items-center gap-2 text-purple-500 font-black uppercase tracking-[0.3em] text-xs mb-2">
             <TrendingUp size={14} />
             Live Now
           </div>
@@ -51,7 +51,7 @@ export default function TrendingSlider() {
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-[#020617] via-transparent to-transparent opacity-60" />
                 <div className="absolute bottom-6 left-6">
-                  <span className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">
+                  <span className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-white/10">
                     {product.category}
                   </span>
                 </div>

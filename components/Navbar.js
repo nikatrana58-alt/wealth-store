@@ -14,8 +14,7 @@ import {
 import AuthModal from "./AuthModal";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-
-const SUPER_ADMIN_EMAIL = "nikatrana58@gmail.com";
+import { isAdminEmail } from "@/lib/admin";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
@@ -32,7 +31,7 @@ export default function Navbar() {
     await signOut(auth);
   };
 
-  const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
+  const isSuperAdmin = isAdminEmail(user?.email);
 
   return (
     <>
@@ -41,7 +40,7 @@ export default function Navbar() {
         onClose={() => setOpenAuth(false)}
       />
       <header className="sticky top-0 z-50 px-5 pt-5">
-        <div className="glass max-w-7xl mx-auto rounded-3xl px-8 py-5 flex items-center justify-between border border-white/10">
+        <div className="glass max-w-[1440px] mx-auto rounded-3xl px-8 py-5 flex items-center justify-between border border-white/10">
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center gap-4 cursor-pointer group">
@@ -52,7 +51,7 @@ export default function Navbar() {
                 <h1 className="font-black text-2xl tracking-tighter">
                   WEALTH<span className="text-purple-500">STORE</span>
                 </h1>
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em]">
+                <p className="text-xs text-gray-500 font-bold uppercase tracking-[0.2em]">
                   The Elite Collection
                 </p>
               </div>
@@ -105,7 +104,7 @@ export default function Navbar() {
             <Link href="/wishlist">
               <button className="glass w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-white/5 transition relative">
                 <Heart size={20} />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-purple-600 rounded-full text-[10px] flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-purple-600 rounded-full text-xs flex items-center justify-center font-bold">
                   0
                 </span>
               </button>

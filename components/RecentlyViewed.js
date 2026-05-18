@@ -12,7 +12,7 @@ export default function RecentlyViewed() {
     return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-24">
+    <section className="max-w-[1440px] mx-auto px-5 py-24">
 
       <div className="flex items-center justify-between mb-12">
 

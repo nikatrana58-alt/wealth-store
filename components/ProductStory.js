@@ -3,7 +3,7 @@
 export default function ProductStory() {
 
   return (
-    <section className="max-w-7xl mx-auto px-5 py-32">
+    <section className="max-w-[1440px] mx-auto px-5 py-32">
 
       <div className="glass rounded-5xl overflow-hidden grid lg:grid-cols-2">
 

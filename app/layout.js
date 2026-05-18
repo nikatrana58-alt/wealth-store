@@ -1,4 +1,3 @@
-import PageTransition from "@/components/PageTransition";
 import "./globals.css";
 
 export const metadata = {
@@ -6,18 +5,18 @@ export const metadata = {
   description: "Discover viral internet products"
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>
-
-  <PageTransition>
-
-    {children}
-
-  </PageTransition>
-
-</body>
+      <body className="antialiased min-h-screen">
+        {children}
+      </body>
     </html>
   );
 }

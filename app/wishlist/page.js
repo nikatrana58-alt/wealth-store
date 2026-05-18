@@ -20,7 +20,7 @@ export default function WishlistPage() {
 
     <main className="min-h-screen bg-[#020617] text-white px-6 py-20">
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1440px] mx-auto">
 
         <h1 className="text-6xl font-black mb-16">
 

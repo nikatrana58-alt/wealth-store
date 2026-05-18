@@ -47,7 +47,7 @@ export default function QuickView({
         transition={{ duration: 0.4 }}
         className="flex min-h-screen items-center justify-center p-5"
       >
-        <div className="glass relative w-full max-w-7xl overflow-hidden rounded-5xl">
+        <div className="glass relative w-full max-w-[1440px] overflow-hidden rounded-5xl">
           <button
             onClick={onClose}
             className="glass absolute top-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full hover:scale-110"

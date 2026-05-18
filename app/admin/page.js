@@ -33,10 +33,14 @@ import { useRouter } from "next/navigation";
 import {
   buildProductPayload,
   getProductBySlugOnce,
+  slugify,
   subscribeToProducts,
 } from "@/lib/products";
-
-const SUPER_ADMIN_EMAIL = "nikatrana58@gmail.com";
+import {
+  uploadProductImages,
+  validateImageFile,
+} from "@/lib/storage";
+import { isAdminEmail } from "@/lib/admin";
 
 const EMPTY_FORM = {
   title: "",
@@ -44,7 +48,6 @@ const EMPTY_FORM = {
   category: "",
   badge: "",
   price: "",
-  image: "",
   description: "",
   affiliate: "",
 };
@@ -58,37 +61,55 @@ const CATEGORY_SUGGESTIONS = [
   "Gaming",
 ];
 
+function AdminLoadingState({ label = "Opening admin console" }) {
+  return (
+    <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center px-5">
+      <div className="glass w-full max-w-md rounded-4xl border border-white/10 p-8 text-center">
+        <div className="mx-auto w-14 h-14 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        <h1 className="text-3xl font-black mt-7">{label}</h1>
+        <p className="text-gray-500 mt-3 leading-7">
+          Checking your session and preparing the product inventory.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function getInitialAuthUser() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return auth.currentUser;
+}
+
 export default function AdminPage() {
-  const [user, setUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
+  const [user, setUser] = useState(getInitialAuthUser);
+  const [authReady, setAuthReady] = useState(() => Boolean(getInitialAuthUser()));
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [products, setProducts] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [activeTab, setActiveTab] = useState("inventory");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState([]);
   const router = useRouter();
 
-  const isSuperAdmin = user?.email === SUPER_ADMIN_EMAIL;
-  const isAuthorized = Boolean(user) && isSuperAdmin;
+  const isAuthorized = Boolean(user) && isAdminEmail(user.email);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       setAuthReady(true);
-
-      if (!nextUser || nextUser.email !== SUPER_ADMIN_EMAIL) {
-        setUser(null);
-        router.replace("/");
-        return;
-      }
-
       setUser(nextUser);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     if (!isAuthorized) {
@@ -117,6 +138,10 @@ export default function AdminPage() {
     router.replace("/");
   };
 
+  const handleReturnHome = () => {
+    router.replace("/");
+  };
+
   const handleChange = (field) => (event) => {
     const { value } = event.target;
     setFormData((current) => ({
@@ -132,6 +157,42 @@ export default function AdminPage() {
     }));
   };
 
+  const closeAddModal = () => {
+    imagePreviewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+    setIsAdding(false);
+    setSelectedImages([]);
+    setImagePreviewUrls([]);
+    setUploadProgress(0);
+  };
+
+  const handleImageSelection = (event) => {
+    const files = Array.from(event.target.files || []);
+
+    if (files.length === 0) {
+      imagePreviewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+      setSelectedImages([]);
+      setImagePreviewUrls([]);
+      setUploadProgress(0);
+      return;
+    }
+
+    try {
+      files.forEach((file) => validateImageFile(file));
+      imagePreviewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+      setSelectedImages(files);
+      setImagePreviewUrls(files.map((file) => URL.createObjectURL(file)));
+      setError("");
+      setSuccess("");
+      setUploadProgress(0);
+    } catch (nextError) {
+      imagePreviewUrls.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+      setSelectedImages([]);
+      setImagePreviewUrls([]);
+      setError(nextError?.message || "Invalid image selected.");
+      event.target.value = "";
+    }
+  };
+
   const handleAddProduct = async (event) => {
     event.preventDefault();
 
@@ -143,25 +204,56 @@ export default function AdminPage() {
     setError("");
     setSuccess("");
     setIsSubmitting(true);
+    setIsUploadingImage(true);
+    setUploadProgress(0);
 
     try {
-      const payload = buildProductPayload(formData);
-      const existing = await getProductBySlugOnce(payload.slug);
+      if (selectedImages.length === 0) {
+        throw new Error("Please choose at least one image before listing the product.");
+      }
+
+      selectedImages.forEach((file) => validateImageFile(file));
+
+      const slug = slugify(formData.slug || formData.title);
+      const existing = await getProductBySlugOnce(slug);
 
       if (existing) {
         throw new Error("That slug already exists. Choose a unique slug.");
       }
 
+      const uploadedImages = await uploadProductImages(
+        selectedImages,
+        ({ progress }) => {
+          setUploadProgress(progress);
+        },
+      );
+      const uploadedImageUrls = uploadedImages.map((image) => image.url);
+
+      const payload = buildProductPayload(formData, {
+        image: uploadedImageUrls[0],
+      });
+      payload.cloudinaryAssets = uploadedImages;
+
+      if (uploadedImageUrls.length > 1) {
+        payload.gallery = uploadedImageUrls;
+      } else {
+        payload.gallery = [uploadedImageUrls[0]];
+      }
+
       await addDoc(collection(db, "products"), payload);
 
       setFormData(EMPTY_FORM);
-      setIsAdding(false);
+      setSelectedImages([]);
+      setImagePreviewUrls([]);
+      setUploadProgress(0);
+      closeAddModal();
       setSuccess("Product listed successfully.");
     } catch (nextError) {
       console.error("Error adding product:", nextError);
       setError(nextError?.message || "Unable to list the product.");
     } finally {
       setIsSubmitting(false);
+      setIsUploadingImage(false);
     }
   };
 
@@ -187,18 +279,34 @@ export default function AdminPage() {
     }
   };
 
-  if (!authReady || (!isAuthorized && loadingProducts)) {
-    return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  if (!authReady) {
+    return <AdminLoadingState />;
   }
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#020617] text-white flex items-center justify-center px-5">
+        <div className="glass max-w-xl w-full rounded-4xl p-8 border border-white/10 text-center">
+          <ShieldCheck className="mx-auto text-purple-400" size={42} />
+          <h1 className="text-3xl font-black mt-6">Admin access not enabled</h1>
+          <p className="text-gray-400 mt-3 leading-7">
+            You are signed in as {user?.email || "an unknown user"}, but this email is not in the admin allowlist.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+            <button
+              onClick={handleReturnHome}
+              className="bg-white text-black px-6 py-4 rounded-2xl font-black"
+            >
+              Return Home
+            </button>
+            <button
+              onClick={handleLogout}
+              className="glass px-6 py-4 rounded-2xl font-black text-red-300 hover:bg-red-500/10"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -245,7 +353,7 @@ export default function AdminPage() {
               </div>
               <div>
                 <p className="font-bold text-sm truncate w-32">{user?.email}</p>
-                <p className="text-[10px] text-purple-400 font-black uppercase tracking-widest">
+                <p className="text-xs text-purple-400 font-black uppercase tracking-widest">
                   Super Admin
                 </p>
               </div>
@@ -336,11 +444,11 @@ export default function AdminPage() {
                     <div className="flex justify-between items-start gap-4">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <span className="text-[10px] font-black bg-white/10 px-2 py-1 rounded-md uppercase tracking-widest text-gray-400">
+                          <span className="text-xs font-black bg-white/10 px-2 py-1 rounded-md uppercase tracking-widest text-gray-400">
                             {product.category}
                           </span>
                           {product.badge ? (
-                            <span className="text-[10px] font-black bg-purple-500/15 px-2 py-1 rounded-md uppercase tracking-widest text-purple-300">
+                            <span className="text-xs font-black bg-purple-500/15 px-2 py-1 rounded-md uppercase tracking-widest text-purple-300">
                               {product.badge}
                             </span>
                           ) : null}
@@ -380,7 +488,7 @@ export default function AdminPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsAdding(false)}
+              onClick={closeAddModal}
               className="absolute inset-0 bg-black/90 backdrop-blur-md"
             />
             <motion.div
@@ -393,11 +501,11 @@ export default function AdminPage() {
                 <div>
                   <h2 className="text-3xl font-black">Add Luxury Product</h2>
                   <p className="text-gray-500 mt-2">
-                    Keep the image field URL-based for now. Firebase Storage can be layered in later.
+                    Upload one or more product images and we will store them in Cloudinary automatically.
                   </p>
                 </div>
                 <button
-                  onClick={() => setIsAdding(false)}
+                  onClick={closeAddModal}
                   className="text-gray-500 hover:text-white transition"
                 >
                   <X size={22} />
@@ -461,7 +569,7 @@ export default function AdminPage() {
                         key={category}
                         type="button"
                         onClick={() => handleCategoryQuickFill(category)}
-                        className="glass px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1"
+                        className="glass px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest text-gray-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1"
                       >
                         <Tag size={12} />
                         {category}
@@ -498,21 +606,74 @@ export default function AdminPage() {
 
                 <div className="md:col-span-2">
                   <label className="block text-xs font-black uppercase tracking-[0.2em] text-gray-500 mb-2">
-                    Image URL
+                    Product Images
                   </label>
-                  <div className="glass rounded-2xl p-4 flex items-center gap-3">
-                    <ImageIcon size={18} className="text-purple-400 shrink-0" />
+                  <label className="glass rounded-3xl border border-dashed border-white/15 p-5 flex flex-col gap-4 cursor-pointer hover:border-purple-500/40 transition">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
+                        <ImageIcon size={18} className="text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="font-bold">Choose one or more product images</p>
+                        <p className="text-xs text-gray-500">
+                          JPG, JPEG, PNG, WEBP up to 5MB each. Cloudinary stores and optimizes every asset.
+                        </p>
+                      </div>
+                    </div>
                     <input
-                      placeholder="https://..."
-                      className="w-full bg-transparent outline-none"
-                      value={formData.image}
-                      onChange={handleChange("image")}
-                      required
+                      type="file"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      multiple
+                      className="hidden"
+                      onChange={handleImageSelection}
                     />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Future Firebase Storage uploads can plug into this field later.
-                  </p>
+
+                    {imagePreviewUrls.length > 0 ? (
+                      <div className={`grid gap-3 ${imagePreviewUrls.length > 1 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-1"}`}>
+                        {imagePreviewUrls.map((previewUrl, index) => (
+                          <div
+                            key={previewUrl}
+                            className="relative overflow-hidden rounded-2xl border border-white/10 bg-black/30 aspect-square"
+                          >
+                            <img
+                              src={previewUrl}
+                              alt={`Selected image preview ${index + 1}`}
+                              className="h-full w-full object-cover"
+                            />
+                            {index === 0 ? (
+                              <div className="absolute top-3 left-3 rounded-full bg-black/70 px-3 py-1 text-xs font-black uppercase tracking-widest text-white">
+                                Primary
+                              </div>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-sm text-gray-500">
+                        No image selected yet.
+                      </div>
+                    )}
+                  </label>
+
+                  {(isUploadingImage || isSubmitting) ? (
+                    <div className="mt-4 glass rounded-2xl border border-white/10 p-4">
+                      <div className="flex items-center justify-between gap-4 mb-3">
+                        <div className="flex items-center gap-2 text-sm font-bold text-gray-300">
+                          <Loader2 className="animate-spin" size={16} />
+                          {isUploadingImage ? "Uploading image to Cloudinary" : "Saving product to Firestore"}
+                        </div>
+                        <span className="text-xs font-black uppercase tracking-widest text-purple-400">
+                          {isUploadingImage ? `${uploadProgress}%` : "Processing"}
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-linear-to-r from-purple-500 to-pink-500 transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
 
                 <div className="md:col-span-2">
@@ -531,7 +692,7 @@ export default function AdminPage() {
                 <div className="md:col-span-2 flex items-center justify-between gap-4 mt-2">
                   <button
                     type="button"
-                    onClick={() => setIsAdding(false)}
+                    onClick={closeAddModal}
                     className="glass px-6 py-4 rounded-2xl font-black text-sm text-gray-300 hover:bg-white/5 transition"
                   >
                     Cancel
