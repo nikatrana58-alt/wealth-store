@@ -18,18 +18,24 @@ export const runtime = "nodejs";
  */
 function getCloudinaryConfig() {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  const apiKey = process.env.CLOUDINARY_API_KEY || null;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET || null;
+  const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET || "affiliate_products";
 
+  // We only require the cloud name. API key/secret are optional so the route
+  // can support unsigned uploads (client-side unsigned preset) or server-side
+  // signed uploads when credentials are available.
   const missing = [];
   if (!cloudName) missing.push("CLOUDINARY_CLOUD_NAME");
-  if (!apiKey) missing.push("CLOUDINARY_API_KEY");
-  if (!apiSecret) missing.push("CLOUDINARY_API_SECRET");
+
+  const isSigned = Boolean(apiKey && apiSecret);
 
   return {
     cloudName,
     apiKey,
     apiSecret,
+    uploadPreset,
+    isSigned,
     missingKeys: missing,
   };
 }
@@ -130,12 +136,76 @@ function uploadBuffer(buffer, options) {
   });
 }
 
+/**
+ * Perform an unsigned upload to Cloudinary's REST endpoint using FormData.
+ * This is used as a fallback when API credentials are not available on the server.
+ */
+async function uploadUnsignedDirect(buffer, { cloudName, uploadPreset, folder, resource_type = "image", use_filename, unique_filename, overwrite, context, filename, contentType }) {
+  console.log("[cloudinary-api] uploadUnsignedDirect starting", { cloudName, uploadPreset, folder, filename });
+
+  try {
+    const form = new FormData();
+
+    // Construct a Blob from the buffer (Node 18+ / Next.js runtime should support this).
+    let blob;
+    try {
+      blob = new Blob([buffer], { type: contentType || "application/octet-stream" });
+    } catch (e) {
+      // Fallback for environments where Buffer -> Blob direct constructor is not supported
+      const uint8 = new Uint8Array(buffer);
+      blob = new Blob([uint8], { type: contentType || "application/octet-stream" });
+    }
+
+    form.append("file", blob, filename || "upload");
+    form.append("upload_preset", uploadPreset);
+    if (folder) form.append("folder", folder);
+    if (use_filename) form.append("use_filename", use_filename ? "true" : "false");
+    if (unique_filename === false) form.append("unique_filename", "false");
+    if (context && typeof context === "object") {
+      const ctx = Object.entries(context).map(([k, v]) => `${k}=${v}`).join("|");
+      form.append("context", ctx);
+    }
+
+    const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${resource_type}/upload`;
+
+    const controller = new AbortController();
+    const timeoutMs = 60000;
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+    const res = await fetch(endpoint, {
+      method: "POST",
+      body: form,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    const text = await res.text();
+    let json;
+    try {
+      json = JSON.parse(text || "{}");
+    } catch (parseErr) {
+      throw new Error(`Unsigned upload parse error: ${parseErr.message} - ${text}`);
+    }
+
+    if (!res.ok) {
+      const message = json?.error?.message || `Cloudinary unsigned upload failed (${res.status})`;
+      throw new Error(message);
+    }
+
+    return json;
+  } catch (err) {
+    console.error("[cloudinary-api] uploadUnsignedDirect failed", err);
+    throw err;
+  }
+}
+
 export async function POST(request) {
   const requestId = Math.random().toString(36).substring(7);
   console.log(`[cloudinary-api][${requestId}] POST request received`);
   
   try {
-    const { cloudName, apiKey, apiSecret, missingKeys } = getCloudinaryConfig();
+    const { cloudName, apiKey, apiSecret, uploadPreset, isSigned, missingKeys } = getCloudinaryConfig();
 
     if (missingKeys.length > 0) {
       console.error(`[cloudinary-api][${requestId}] Missing environment variables`, { missingKeys });
@@ -145,14 +215,17 @@ export async function POST(request) {
       );
     }
 
-    console.log(`[cloudinary-api][${requestId}] Cloudinary config found`);
+    console.log(`[cloudinary-api][${requestId}] Cloudinary config found`, { isSigned, uploadPreset });
 
     cloudinary.config({
       cloud_name: cloudName,
-      api_key: apiKey,
-      api_secret: apiSecret,
       secure: true,
+      ...(isSigned ? { api_key: apiKey, api_secret: apiSecret } : {}),
     });
+
+    if (!isSigned) {
+      console.warn(`[cloudinary-api][${requestId}] Cloudinary API key/secret not provided — attempting unsigned uploads using preset '${uploadPreset}'`);
+    }
 
     console.log(`[cloudinary-api][${requestId}] Parsing formData...`);
     let formData;
@@ -203,11 +276,12 @@ export async function POST(request) {
       console.log(`[cloudinary-api][${requestId}] Reading file arrayBuffer...`);
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      console.log(`[cloudinary-api][${requestId}] Buffer created (${buffer.length} bytes), calling uploadBuffer`);
+      console.log(`[cloudinary-api][${requestId}] Buffer created (${buffer.length} bytes), preparing upload`);
 
-      const result = await uploadBuffer(buffer, {
+      const uploadOptions = {
         folder: "affiliate-store/products",
         resource_type: "image",
+        upload_preset: uploadPreset,
         use_filename: true,
         unique_filename: true,
         overwrite: false,
@@ -219,7 +293,31 @@ export async function POST(request) {
         transformation: [
           { quality: "auto", fetch_format: "auto" },
         ],
-      });
+      };
+
+      let result;
+      if (isSigned) {
+        result = await uploadBuffer(buffer, uploadOptions);
+      } else {
+        try {
+          result = await uploadUnsignedDirect(buffer, {
+            cloudName,
+            uploadPreset,
+            folder: uploadOptions.folder,
+            resource_type: uploadOptions.resource_type,
+            use_filename: uploadOptions.use_filename,
+            unique_filename: uploadOptions.unique_filename,
+            overwrite: uploadOptions.overwrite,
+            context: uploadOptions.context,
+            filename: originalFilename,
+            contentType: file.type,
+            transformation: uploadOptions.transformation,
+          });
+        } catch (unsignedErr) {
+          console.warn(`[cloudinary-api][${requestId}] Unsigned upload failed, falling back to SDK stream`, { unsignedErr: unsignedErr?.message });
+          result = await uploadBuffer(buffer, uploadOptions);
+        }
+      }
 
       console.log(`[cloudinary-api][${requestId}] File ${index + 1} uploaded successfully`, { public_id: result.public_id });
 

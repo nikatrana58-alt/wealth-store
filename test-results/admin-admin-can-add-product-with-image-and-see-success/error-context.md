@@ -12,11 +12,7 @@
 # Error details
 
 ```
-Test timeout of 120000ms exceeded.
-```
-
-```
-Error: page.goto: net::ERR_ABORTED; maybe frame was detached?
+Error: page.goto: Page crashed
 Call log:
   - navigating to "http://localhost:3000/admin?testAuth=1", waiting until "load"
 
@@ -63,7 +59,7 @@ Call log:
   36 | 
   37 |   // Navigate with testAuth to bypass real Firebase auth
 > 38 |   await page.goto('/admin?testAuth=1');
-     |              ^ Error: page.goto: net::ERR_ABORTED; maybe frame was detached?
+     |              ^ Error: page.goto: Page crashed
   39 | 
   40 |   // Open add product modal
   41 |   await page.click('text=New Product');
