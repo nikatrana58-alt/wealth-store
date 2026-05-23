@@ -72,6 +72,7 @@ const REQUIRED_PRODUCT_FIELDS = [
 ];
 
 const FALLBACK_IMAGE_URL = "https://via.placeholder.com/800x800.png?text=No+Image";
+const UPLOAD_TIMEOUT_MS = 90000;
 
 function validateProductForm(formData, selectedImages) {
   const missingFields = REQUIRED_PRODUCT_FIELDS
@@ -267,163 +268,163 @@ export default function AdminPage() {
     }
   };
 
-  const handleAddProduct = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (event) => {
+    if (event) event.preventDefault();
+    console.log("[admin-submit] Start: Submit button clicked");
+
+    if (isSubmitting) {
+      console.warn("[admin-submit] Already submitting, ignoring duplicate click");
+      return;
+    }
 
     if (!isAuthorized) {
+      console.error("[admin-submit] Unauthorized access attempt");
       setError("You must be signed in as an admin to list products.");
+      showToast("Admin access required", "error");
       return;
     }
 
-    let validated;
-
-    try {
-      console.log("[product-upload] submit clicked", { title: formData.title, slug: formData.slug });
-      validated = validateProductForm(formData, selectedImages);
-      console.log("[product-upload] validation passed", { slug: validated.slug, imageCount: selectedImages.length });
-      showToast("Validation passed", "info");
-    } catch (nextError) {
-      console.error("[product-upload] validation failure", nextError);
-      setError(nextError?.message || "Please complete the product form.");
-      setSuccess("");
-      showToast(nextError?.message || "Validation failed", "error");
-      return;
-    }
-
+    // Reset states
     setError("");
     setSuccess("");
     setIsSubmitting(true);
     setIsUploadingImage(false);
     setUploadProgress(0);
 
-    try {
-      const { imageFiles, slug } = validated;
-      console.log("[product-upload] checking product slug", { slug });
-      const existing = await getProductBySlugOnce(slug);
+    let finalCleanupCalled = false;
+    const cleanup = () => {
+      if (finalCleanupCalled) return;
+      finalCleanupCalled = true;
+      console.log("[admin-submit] Performing final cleanup");
+      setIsSubmitting(false);
+      setIsUploadingImage(false);
+    };
 
-      if (existing) {
-        throw new Error("That slug already exists. Choose a unique slug.");
+    try {
+      console.log("[admin-submit] 1. Validating form data", formData);
+      const { imageFiles, slug } = validateProductForm(formData, selectedImages);
+      console.log("[admin-submit] Validation passed", { slug, imageCount: imageFiles.length });
+      showToast("Form validation passed", "info");
+
+      console.log("[admin-submit] 2. Checking if slug already exists in Firestore", { slug });
+      let existing;
+      try {
+        existing = await getProductBySlugOnce(slug);
+        console.log("[admin-submit] Slug check complete", { exists: !!existing });
+      } catch (err) {
+        console.error("[admin-submit] Error checking slug uniqueness", err);
+        throw new Error(`Database connectivity issue: ${err.message}`);
       }
 
+      if (existing) {
+        console.warn("[admin-submit] Slug conflict detected", { slug });
+        throw new Error(`A product with the slug "${slug}" already exists. Please choose a unique title or slug.`);
+      }
 
       let uploadedImages = [];
       let uploadedImageUrls = [];
 
+      // Image upload phase
       if (imageFiles && imageFiles.length > 0) {
+        console.log("[admin-submit] 3. Starting image upload to Cloudinary", { fileCount: imageFiles.length });
         setIsUploadingImage(true);
-        showToast("Uploading images...", "info");
-        console.log("[product-upload] upload started", { fileCount: imageFiles.length });
+        setUploadProgress(1);
+        showToast("Uploading images to Cloudinary...", "info");
 
         try {
-          uploadedImages = await uploadProductImages(imageFiles, ({ progress }) => {
-            setUploadProgress(progress);
+          const uploadPromise = uploadProductImages(imageFiles, (event) => {
+            console.log(`[admin-submit] Upload progress: ${event.progress}%`);
+            setUploadProgress(event.progress);
           });
-          console.log("[product-upload] upload completed", { uploads: uploadedImages });
-          showToast("Upload success", "success");
+
+          // Client-side safety timeout for the entire upload process
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Image upload timed out after 110 seconds.")), 110000)
+          );
+
+          uploadedImages = await Promise.race([uploadPromise, timeoutPromise]);
+          
+          console.log("[admin-submit] Image upload phase finished", { uploadedCount: uploadedImages.length });
+          showToast("Images uploaded successfully", "success");
         } catch (uploadError) {
-          console.error("[product-upload] upload failure", uploadError);
-          setError(uploadError?.message || "Unable to upload images to Cloudinary.");
-          showToast(uploadError?.message || "Upload failed", "error");
-          setIsUploadingImage(false);
-          setIsSubmitting(false);
-          setUploadProgress(0);
-          return;
+          console.error("[admin-submit] Image upload failed", uploadError);
+          throw new Error(`Cloudinary upload failed: ${uploadError.message}`);
         } finally {
           setIsUploadingImage(false);
+          setUploadProgress(100);
         }
 
-        uploadedImageUrls = uploadedImages.map((image) => image.url);
-
-        if (uploadedImageUrls.some((url) => !url)) {
-          const errMsg = "One or more uploaded images did not return a Cloudinary URL.";
-          console.error("[product-upload] missing image url", { uploadedImages });
-          setError(errMsg);
-          showToast(errMsg, "error");
-          setIsSubmitting(false);
-          setUploadProgress(0);
-          return;
+        uploadedImageUrls = uploadedImages.map((img) => img.url);
+        
+        if (uploadedImageUrls.length === 0 || uploadedImageUrls.some(url => !url)) {
+          console.error("[admin-submit] Missing URL in one or more uploads", { uploadedImages });
+          throw new Error("One or more images failed to return a valid URL from Cloudinary.");
         }
       } else {
-        console.log("[product-upload] no images provided, using fallback image");
+        console.log("[admin-submit] 3. No images selected, using fallback image", { fallback: FALLBACK_IMAGE_URL });
+        showToast("No images selected, using placeholder", "info");
         uploadedImageUrls = [FALLBACK_IMAGE_URL];
         uploadedImages = [];
       }
 
+      // Firestore save phase
+      console.log("[admin-submit] 4. Preparing product payload for Firestore");
       const payload = buildProductPayload(formData, {
         image: uploadedImageUrls[0],
       });
+      
+      // Enrich payload with extra data
+      payload.gallery = uploadedImageUrls;
       payload.cloudinaryAssets = uploadedImages;
+      payload.views = 0;
+      payload.rating = 5;
+      payload.score = 95;
+      payload.aiTag = formData.badge || "Premium Pick";
 
-      if (uploadedImageUrls.length > 1) {
-        payload.gallery = uploadedImageUrls;
-      } else {
-        payload.gallery = [uploadedImageUrls[0]];
-      }
-
-      console.log("[product-upload] saving product to Firestore", {
-        slug: payload.slug,
-        imageCount: uploadedImageUrls.length,
-      });
+      console.log("[admin-submit] 5. Saving product to Firestore", payload);
+      showToast("Saving to database...", "info");
+      
+      const withTimeout = (promise, ms, label) => {
+        return Promise.race([
+          promise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error(`${label} timed out after ${ms/1000}s`)), ms))
+        ]);
+      };
 
       let productRef;
-
       try {
-        productRef = await addDoc(collection(db, "products"), payload);
+        productRef = await withTimeout(
+          addDoc(collection(db, "products"), payload),
+          30000,
+          "Firestore save"
+        );
+        console.log("[admin-submit] Product saved to Firestore successfully", { id: productRef.id });
       } catch (firestoreError) {
-        console.error("[product-upload] firestore failure", firestoreError);
-        throw firestoreError;
+        console.error("[admin-submit] Firestore save failed", firestoreError);
+        throw new Error(`Database save failed: ${firestoreError.message}. Check your internet connection.`);
       }
 
-      console.log("[product-upload] firestore save success", {
-        productId: productRef.id,
-        slug: payload.slug,
-        image: payload.image,
-      });
-
-      // Optimistically add the product to the inventory so it appears immediately.
-      try {
-        const newProduct = {
-          id: productRef.id,
-          title: payload.title,
-          slug: payload.slug,
-          category: payload.category,
-          badge: payload.badge,
-          price: payload.price,
-          image: payload.image,
-          description: payload.description,
-          affiliate: payload.affiliate,
-          createdAt: { seconds: Date.now() / 1000 },
-          views: 0,
-          rating: 5,
-          score: 95,
-          aiTag: payload.badge || "Premium Pick",
-          gallery: payload.gallery || [payload.image],
-          cloudinaryAssets: payload.cloudinaryAssets || [],
-        };
-
-        setProducts((current) => [newProduct, ...(current || [])]);
-      } catch (err) {
-        console.warn("[product-upload] optimistic update failed", err);
-      }
-
-      console.log("[product-upload] firestore save success", {
-        productId: productRef.id,
-      });
-
+      // Final success
+      console.log("[admin-submit] 6. All steps completed successfully");
+      setSuccess(`Product "${payload.title}" successfully listed!`);
+      showToast("Product listed successfully!", "success");
+      
+      // Reset form and UI
       setFormData(EMPTY_FORM);
       setSelectedImages([]);
       setImagePreviewUrls([]);
       setUploadProgress(0);
-      closeAddModal({ force: true });
-      setSuccess("Product listed successfully.");
-      showToast("Product added successfully", "success");
-    } catch (nextError) {
-      setIsUploadingImage(false);
-      console.error("[product-upload] submit failure", nextError);
-      setError(nextError?.message || "Unable to list the product.");
+      
+      if (typeof closeAddModal === "function") {
+        closeAddModal({ force: true });
+      }
+      
+    } catch (err) {
+      console.error("[admin-submit] Error in submission pipeline:", err);
+      setError(err.message || "An unexpected error occurred during submission.");
+      showToast(err.message || "Submission failed", "error");
     } finally {
-      setIsSubmitting(false);
-      setIsUploadingImage(false);
+      cleanup();
     }
   };
 
@@ -689,7 +690,7 @@ export default function AdminPage() {
               </div>
 
               <form
-                onSubmit={handleAddProduct}
+                onSubmit={handleSubmit}
                 noValidate
                 className="grid grid-cols-1 md:grid-cols-2 gap-5"
               >
